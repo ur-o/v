@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Video Deep Link</title>
+<meta name="description" content="Generate a direct video link for YouTube, Instagram and Facebook.">
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(255,0,100,.18),transparent 30%),
+    radial-gradient(circle at 90% 20%,rgba(0,140,255,.18),transparent 30%),
+    linear-gradient(135deg,#080b14,#111827 55%,#080b14);
+  color:#fff;
+  min-height:100vh;
+}
+
+.container{
+  width:min(680px,92%);
+  margin:0 auto;
+  padding:42px 0 50px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:28px;
+}
+
+.logo{
+  width:78px;
+  height:78px;
+  margin:0 auto 15px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:43px;
+  background:linear-gradient(135deg,#ff304f,#7c3aed,#1597ff);
+  box-shadow:0 15px 45px rgba(0,0,0,.35);
+  animation:float 2.5s ease-in-out infinite;
+}
+
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+
+h1{
+  margin:0;
+  font-size:30px;
+}
+
+.subtitle{
+  color:#aeb7c7;
+  margin:9px 0 0;
+  line-height:1.5;
+}
+
+.card{
+  background:rgba(17,24,39,.82);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:22px;
+  padding:22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  backdrop-filter:blur(14px);
+}
+
+.warning{
+  color:#fbbf24;
+  background:rgba(245,158,11,.10);
+  border:1px solid rgba(245,158,11,.28);
+  border-radius:10px;
+  padding:10px 12px;
+  margin-top:15px;
+  text-align:center;
+  font-size:13px;
+  font-weight:600;
+}
+
+.label{
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  color:#d7deea;
+  margin-bottom:9px;
+}
+
+textarea{
+  width:100%;
+  min-height:125px;
+  resize:vertical;
+  border:1px solid #303a4d;
+  outline:none;
+  border-radius:15px;
+  background:#0b1220;
+  color:#fff;
+  padding:15px;
+  font-size:15px;
+  line-height:1.5;
+}
+
+textarea:focus{
+  border-color:#64748b;
+  box-shadow:0 0 0 3px rgba(99,102,241,.12);
+}
+
+.generate{
+  width:100%;
+  margin-top:13px;
+  border:0;
+  border-radius:14px;
+  padding:15px;
+  font-size:15px;
+  font-weight:700;
+  color:#fff;
+  cursor:pointer;
+  background:linear-gradient(135deg,#7c3aed,#2563eb);
+  box-shadow:0 10px 25px rgba(37,99,235,.22);
+}
+
+.generate:active{
+  transform:scale(.99);
+}
+
+.status{
+  margin-top:15px;
+  text-align:center;
+  font-size:14px;
+  color:#aeb7c7;
+  display:none;
+}
+
+.result{
+  display:none;
+  margin-top:20px;
+}
+
+/* PLATFORM */
+
+.platform{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+.platform-icon{
+  width:38px;
+  height:38px;
+  border-radius:11px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:21px;
+}
+
+.youtube{
+  background:#ff0033;
+}
+
+.instagram{
+  background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);
+}
+
+.facebook{
+  background:#1877f2;
+}
+
+/* GENERATED URL */
+
+.generated{
+  display:flex;
+  gap:9px;
+  margin-bottom:15px;
+}
+
+.generated input{
+  min-width:0;
+  flex:1;
+  border:1px solid #303a4d;
+  border-radius:13px;
+  background:#080d18;
+  color:#dce5f3;
+  padding:13px;
+  font-size:13px;
+  outline:none;
+}
+
+.copy{
+  border:0;
+  border-radius:13px;
+  padding:0 18px;
+  font-weight:800;
+  color:#fff;
+  cursor:pointer;
+  background:#334155;
+  white-space:nowrap;
+}
+
+/* PREVIEW */
+
+.preview{
+  overflow:hidden;
+  border-radius:17px;
+  border:1px solid rgba(255,255,255,.09);
+  background:#0a101c;
+}
+
+.preview-media{
+  width:100%;
+  background:#050914;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.preview-image{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  display:block;
+}
+
+.preview-iframe{
+  width:100%;
+  height:380px;
+  border:0;
+  display:block;
+  background:#050914;
+}
+
+.preview-info{
+  padding:15px;
+}
+
+.preview-title{
+  font-size:15px;
+  font-weight:700;
+  line-height:1.4;
+  margin-bottom:7px;
+}
+
+.preview-description{
+  color:#9ca8ba;
+  font-size:13px;
+  line-height:1.45;
+}
+
+/* LAUNCHER */
+
+body.launcher-page .container{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:20px 0;
+}
+
+body.launcher-page .launcher{
+  width:100%;
+}
+
+.launcher{
+  display:none;
+  text-align:center;
+}
+
+.launcher .rocket{
+  font-size:72px;
+  margin-bottom:8px;
+  animation:rocket 1.6s ease-in-out infinite;
+}
+
+@keyframes rocket{
+  0%,100%{
+    transform:translateY(0) rotate(-3deg);
+  }
+
+  50%{
+    transform:translateY(-10px) rotate(3deg);
+  }
+}
+
+.launcher h2{
+  margin:5px 0 8px;
+}
+
+.launcher p{
+  color:#9ca8ba;
+  margin:0 0 20px;
+}
+
+.brand-logo{
+  width:21px;
+  height:21px;
+  flex:0 0 21px;
+  display:block;
+}
+
+.official-logo{
+  width:24px;
+  height:24px;
+  border-radius:7px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:900;
+  background:rgba(255,255,255,.18);
+}
+
+.retry{
+  width:100%;
+  border:0;
+  border-radius:14px;
+  padding:15px;
+  margin-top:10px;
+  color:#fff;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.retry.youtube-btn{
+  background:#ff0033;
+}
+
+.retry.instagram-btn{
+  background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);
+}
+
+.retry.facebook-btn{
+  background:#1877f2;
+}
+
+.failure{
+  display:none;
+  margin-top:18px;
+  color:#fca5a5;
+  font-size:14px;
+}
+
+.footer{
+  text-align:center;
+  color:#64748b;
+  font-size:12px;
+  margin-top:24px;
+}
+
+@media(max-width:520px){
+
+  .container{
+    padding-top:28px;
+  }
+
+  .card{
+    padding:17px;
+  }
+
+  h1{
+    font-size:26px;
+  }
+
+  .generated{
+    flex-direction:column;
+  }
+
+  .copy{
+    padding:13px;
+  }
+
+  .preview-iframe{
+    height:360px;
+  }
+
+  .preview-title{
+    font-size:14px;
+    line-height:1.4;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+
+  <div class="header" id="mainHeader">
+
+    <div class="logo">🚀</div>
+
+    <h1>Video Deep Link</h1>
+
+    <div class="subtitle">
+      Paste a YouTube, Instagram or Facebook video link
+    </div>
+
+  </div>
+
+
+  <!-- GENERATOR -->
+
+  <div class="card" id="generator">
+
+    <label class="label">
+      Video URL
+    </label>
+
+    <textarea
+      id="urlInput"
+      placeholder="Paste YouTube, Instagram or Facebook video URL..."
+      autocomplete="off"
+    ></textarea>
+
+    <button
+      class="generate"
+      onclick="generateLink()"
+    >
+      Generate Deep Link 🚀
+    </button>
+
+    <div
+      class="status"
+      id="status"
+    ></div>
+
+
+    <!-- RESULT -->
+
+    <div
+      class="result"
+      id="result"
+    >
+
+      <!-- PLATFORM -->
+
+      <div class="platform">
+
+        <div
+          class="platform-icon"
+          id="platformIcon"
+        >
+          ▶
+        </div>
+
+        <span id="platformName">
+          YouTube
+        </span>
+
+      </div>
+
+
+      <!-- COPY URL - NOW ABOVE PREVIEW -->
+
+      <div class="generated">
+
+        <input
+          id="generatedUrl"
+          readonly
+        >
+
+        <button
+          class="copy"
+          onclick="copyLink()"
+        >
+          Copy
+        </button>
+
+      </div>
+
+
+      <!-- PREVIEW -->
+
+      <div class="preview">
+
+        <div
+          class="preview-media"
+          id="previewMedia"
+        >
+
+          <img
+            id="previewImage"
+            class="preview-image"
+            alt="Video preview"
+          >
+
+        </div>
+
+        <div class="preview-info">
+
+          <div
+            class="preview-title"
+            id="previewTitle"
+          >
+            Video Preview
+          </div>
+
+          <div
+            class="preview-description"
+            id="previewDescription"
+          >
+            Open this link to launch the original video.
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- LAUNCHER -->
+
+  <div
+    class="card launcher"
+    id="launcher"
+  >
+
+    <div class="rocket">
+      🚀
+    </div>
+
+    <h2 id="launcherTitle">
+      Opening Video...
+    </h2>
+
+    <p id="launcherText">
+      Please wait while we open the video.
+    </p>
+
+
+    <div id="retryArea">
+
+      <button
+        class="retry youtube-btn"
+        id="youtubeRetry"
+        onclick="openYouTube()"
+      >
+        <svg class="brand-logo youtube-logo" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8Z"/>
+          <path fill="#ff0033" d="m9.6 15.4 6.2-3.4-6.2-3.4v6.8Z"/>
+        </svg>
+        Open in YouTube
+      </button>
+
+      <button
+        class="retry instagram-btn"
+        id="instagramRetry"
+        onclick="openInstagram()"
+      >
+        <svg class="brand-logo instagram-logo" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" stroke-width="2.2"/>
+          <circle cx="17.5" cy="6.7" r="1.25" fill="currentColor"/>
+        </svg>
+        Open in Instagram
+      </button>
+
+      <button
+        class="retry facebook-btn"
+        id="facebookRetry"
+        onclick="openFacebook()"
+      >
+        <svg class="brand-logo facebook-logo" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M13.5 21v-8h2.8l.4-3h-3.2V8.1c0-.9.3-1.5 1.6-1.5h1.8V3.9c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.4v3h2.8v8h3.3Z"/>
+        </svg>
+        Open in Facebook
+      </button>
+
+    </div>
+
+
+    <div
+      class="failure"
+      id="failure"
+    >
+      Didn't open? Tap the button to try again.
+    </div>
+
+  </div>
+
+
+
+</div>
+
+
+<script>
+
+/* =========================================
+   CONFIG
+========================================= */
+
+const SITE_URL =
+  "https://ur-o.github.io/o/";
+
+
+/* =========================================
+   DETECT VIDEO
+========================================= */
+
+function detectVideo(urlString){
+
+  let url;
+
+  try{
+
+    url =
+      new URL(
+        urlString.trim()
+      );
+
+  }catch{
+
+    return null;
+
+  }
+
+  const host =
+    url.hostname
+      .toLowerCase()
+      .replace(/^www\./,"");
+
+
+  /* ================= YOUTUBE ================= */
+
+  if(
+    host === "youtube.com" ||
+    host === "m.youtube.com" ||
+    host === "youtu.be"
+  ){
+
+    let id = "";
+
+
+    if(host === "youtu.be"){
+
+      id =
+        url.pathname
+          .split("/")
+          .filter(Boolean)[0] || "";
+
+    }
+
+
+    if(!id){
+
+      id =
+        url.searchParams.get("v") || "";
+
+    }
+
+
+    if(!id){
+
+      const parts =
+        url.pathname
+          .split("/")
+          .filter(Boolean);
+
+      if(
+        parts[0] === "shorts" ||
+        parts[0] === "embed" ||
+        parts[0] === "live"
+      ){
+
+        id =
+          parts[1] || "";
+
+      }
+
+    }
+
+
+    if(id){
+
+      id =
+        id
+          .split("?")[0]
+          .split("&")[0];
+
+      return {
+
+        platform:"youtube",
+
+        id:id,
+
+        original:url.href,
+
+        title:"YouTube Video",
+
+        description:
+          "Watch this video on YouTube.",
+
+        image:
+          "https://i.ytimg.com/vi/" +
+          encodeURIComponent(id) +
+          "/hqdefault.jpg"
+
+      };
+
+    }
+
+  }
+
+
+  /* ================= INSTAGRAM ================= */
+
+  if(
+    host === "instagram.com" ||
+    host === "m.instagram.com"
+  ){
+
+    const parts =
+      url.pathname
+        .split("/")
+        .filter(Boolean);
+
+
+    if(
+      parts.length >= 2 &&
+      (
+        parts[0].toLowerCase() === "reel" ||
+        parts[0].toLowerCase() === "reels"
+      )
+    ){
+
+      const id =
+        parts[1];
+
+
+      if(id){
+
+        return {
+
+          platform:"instagram",
+
+          id:id,
+
+          original:url.href,
+
+          title:"Instagram Reel",
+
+          description:
+            "Watch this Reel on Instagram."
+
+        };
+
+      }
+
+    }
+
+  }
+
+
+  /* ================= FACEBOOK ================= */
+
+  if(
+    host === "facebook.com" ||
+    host === "m.facebook.com" ||
+    host === "fb.watch"
+  ){
+
+    const path =
+      url.pathname.toLowerCase();
+
+
+    const isVideo =
+      path.includes("/videos/") ||
+      path.includes("/watch") ||
+      path.includes("/reel/") ||
+      path.includes("/share/") ||
+      host === "fb.watch";
+
+
+    if(isVideo){
+
+      return {
+
+        platform:"facebook",
+
+        original:url.href,
+
+        title:"Facebook Video",
+
+        description:
+          "Watch this video on Facebook."
+
+      };
+
+    }
+
+  }
+
+
+  return null;
+}
+
+
+/* =========================================
+   BUILD OWN URL
+========================================= */
+
+function buildOwnUrl(video){
+
+  if(video.platform === "youtube"){
+
+    return (
+      SITE_URL +
+      "?yt=" +
+      encodeURIComponent(video.id)
+    );
+
+  }
+
+
+  if(video.platform === "instagram"){
+
+    return (
+      SITE_URL +
+      "?ig=" +
+      encodeURIComponent(video.id)
+    );
+
+  }
+
+
+  if(video.platform === "facebook"){
+
+    return (
+      SITE_URL +
+      "?fb=" +
+      encodeURIComponent(video.original)
+    );
+
+  }
+
+
+  return SITE_URL;
+}
+
+
+/* =========================================
+   GENERATE
+========================================= */
+
+function generateLink(){
+
+  const input =
+    document
+      .getElementById("urlInput")
+      .value
+      .trim();
+
+
+  const status =
+    document.getElementById("status");
+
+
+  const result =
+    document.getElementById("result");
+
+
+  if(!input){
+
+    result.style.display =
+      "none";
+
+    status.style.display =
+      "block";
+
+    status.textContent =
+      "Please paste a video URL.";
+
+    return;
+  }
+
+
+  const video =
+    detectVideo(input);
+
+
+  if(!video){
+
+    result.style.display =
+      "none";
+
+    status.style.display =
+      "block";
+
+    status.textContent =
+      "⚠ Please enter a valid YouTube, Instagram or Facebook video URL.";
+    status.className = "warning";
+
+    return;
+  }
+
+
+  status.style.display =
+    "none";
+  status.className = "status";
+
+  result.style.display =
+    "block";
+
+
+  const ownUrl =
+    buildOwnUrl(video);
+
+
+  document
+    .getElementById("generatedUrl")
+    .value =
+    ownUrl;
+
+
+  /* PLATFORM */
+
+  const icon =
+    document.getElementById("platformIcon");
+
+
+  const name =
+    document.getElementById("platformName");
+
+
+  if(video.platform === "youtube"){
+
+    icon.textContent =
+      "▶";
+
+    icon.className =
+      "platform-icon youtube";
+
+    name.textContent =
+      "YouTube";
+
+  }
+
+  else if(video.platform === "instagram"){
+
+    icon.textContent =
+      "◎";
+
+    icon.className =
+      "platform-icon instagram";
+
+    name.textContent =
+      "Instagram";
+
+  }
+
+  else{
+
+    icon.textContent =
+      "f";
+
+    icon.className =
+      "platform-icon facebook";
+
+    name.textContent =
+      "Facebook";
+
+  }
+
+
+  /* PREVIEW */
+
+  createPreview(video);
+
+}
+
+
+/* =========================================
+   CREATE PREVIEW
+========================================= */
+
+async function createPreview(video){
+
+  const media =
+    document.getElementById("previewMedia");
+
+
+  const title =
+    document.getElementById("previewTitle");
+
+
+  const description =
+    document.getElementById("previewDescription");
+
+
+  media.innerHTML = "";
+
+
+  /* ================= YOUTUBE ================= */
+
+  if(video.platform === "youtube"){
+
+    const img =
+      document.createElement("img");
+
+
+    img.className =
+      "preview-image";
+
+
+    img.src =
+      "https://i.ytimg.com/vi/" +
+      encodeURIComponent(video.id) +
+      "/hqdefault.jpg";
+
+
+    img.alt =
+      "YouTube video";
+
+
+    media.appendChild(img);
+
+
+    title.textContent =
+      "Loading video title...";
+
+
+    description.textContent =
+      "Loading video information...";
+
+
+    /*
+      YouTube oEmbed gives us the real public title
+      and channel/author without changing the interface.
+    */
+
+    try{
+
+      const oembedUrl =
+        "https://www.youtube.com/oembed?url=" +
+        encodeURIComponent(
+          "https://www.youtube.com/watch?v=" + video.id
+        ) +
+        "&format=json";
+
+
+      const response =
+        await fetch(oembedUrl);
+
+
+      if(response.ok){
+
+        const data =
+          await response.json();
+
+
+        if(data.title){
+
+          title.textContent =
+            data.title;
+
+          document.title =
+            data.title;
+        }
+
+
+        if(data.author_name){
+
+          description.textContent =
+            "By " +
+            data.author_name +
+            " • Watch this video on YouTube.";
+        }
+
+      }else{
+
+        title.textContent =
+          "YouTube Video";
+
+        description.textContent =
+          "Watch this video on YouTube.";
+      }
+
+    }catch{
+
+      title.textContent =
+        "YouTube Video";
+
+      description.textContent =
+        "Watch this video on YouTube.";
+    }
+
+
+    return;
+  }
+
+
+  /* ================= INSTAGRAM ================= */
+
+  if(video.platform === "instagram"){
+
+    const iframe =
+      document.createElement("iframe");
+
+
+    iframe.className =
+      "preview-iframe";
+
+
+    iframe.loading =
+      "lazy";
+
+
+    iframe.allowFullscreen =
+      true;
+
+
+    iframe.setAttribute(
+      "scrolling",
+      "no"
+    );
+
+
+    iframe.setAttribute(
+      "allow",
+      "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+    );
+
+
+    iframe.src =
+      "https://www.instagram.com/reel/" +
+      encodeURIComponent(video.id) +
+      "/embed/";
+
+
+    media.appendChild(iframe);
+
+
+    title.textContent =
+      "Instagram Reel";
+
+
+    description.textContent =
+      "Watch this Reel on Instagram.";
+
+    return;
+  }
+
+
+  /* ================= FACEBOOK ================= */
+
+  if(video.platform === "facebook"){
+
+    const iframe =
+      document.createElement("iframe");
+
+
+    iframe.className =
+      "preview-iframe";
+
+
+    iframe.loading =
+      "lazy";
+
+
+    iframe.allowFullscreen =
+      true;
+
+
+    iframe.setAttribute(
+      "scrolling",
+      "no"
+    );
+
+
+    iframe.setAttribute(
+      "frameborder",
+      "0"
+    );
+
+
+    iframe.setAttribute(
+      "allow",
+      "autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+    );
+
+
+    iframe.src =
+      "https://www.facebook.com/plugins/video.php" +
+      "?href=" +
+      encodeURIComponent(video.original) +
+      "&show_text=false" +
+      "&width=680";
+
+
+    media.appendChild(iframe);
+
+
+    title.textContent =
+      "Facebook Video";
+
+
+    description.textContent =
+      "Watch this video on Facebook.";
+
+  }
+
+}
+
+
+/* =========================================
+   COPY
+========================================= */
+
+async function copyLink(){
+
+  const input =
+    document.getElementById("generatedUrl");
+
+
+  const button =
+    document.querySelector(".copy");
+
+
+  try{
+
+    await navigator.clipboard.writeText(
+      input.value
+    );
+
+  }catch{
+
+    input.select();
+
+    document.execCommand(
+      "copy"
+    );
+
+  }
+
+
+  const oldText =
+    button.textContent;
+
+
+  button.textContent =
+    "Copied ✓";
+
+
+  setTimeout(()=>{
+
+    button.textContent =
+      oldText;
+
+  },1500);
+
+}
+
+
+/* =========================================
+   LAUNCHER DATA
+========================================= */
+
+function getLauncherData(){
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const yt =
+    params.get("yt");
+
+
+  const ig =
+    params.get("ig");
+
+
+  const fb =
+    params.get("fb");
+
+
+  if(yt){
+
+    return {
+
+      platform:"youtube",
+
+      id:yt
+
+    };
+
+  }
+
+
+  if(ig){
+
+    return {
+
+      platform:"instagram",
+
+      id:ig
+
+    };
+
+  }
+
+
+  if(fb){
+
+    let original =
+      fb;
+
+
+    try{
+
+      original =
+        decodeURIComponent(fb);
+
+    }catch{}
+
+
+    return {
+
+      platform:"facebook",
+
+      original:original
+
+    };
+
+  }
+
+
+  return null;
+}
+
+
+/* =========================================
+   YOUTUBE OPEN
+========================================= */
+
+function openYouTube(){
+
+  const data =
+    getLauncherData();
+
+
+  if(!data || !data.id)
+    return;
+
+
+  const id =
+    data.id;
+
+
+  const webUrl =
+    "https://www.youtube.com/watch?v=" +
+    encodeURIComponent(id);
+
+
+  const intentUrl =
+    "intent://www.youtube.com/watch?v=" +
+    encodeURIComponent(id) +
+    "#Intent;" +
+    "scheme=https;" +
+    "package=com.google.android.youtube;" +
+    "end";
+
+
+  if(isMobile()){
+
+    window.location.href =
+      intentUrl;
+
+  }else{
+
+    window.location.href =
+      webUrl;
+
+  }
+
+}
+
+
+/* =========================================
+   INSTAGRAM OPEN
+========================================= */
+
+function openInstagram(){
+
+  const data =
+    getLauncherData();
+
+
+  if(!data || !data.id)
+    return;
+
+
+  const id =
+    data.id;
+
+
+  const webUrl =
+    "https://www.instagram.com/reel/" +
+    encodeURIComponent(id) +
+    "/";
+
+
+  if(isMobile()){
+
+    const appUrl =
+      "instagram://reel/" +
+      encodeURIComponent(id);
+
+
+    window.location.href =
+      appUrl;
+
+
+    /* No mobile web fallback. Stay on launcher if app does not open. */
+
+  }else{
+
+    window.location.href =
+      webUrl;
+
+  }
+
+}
+
+
+/* =========================================
+   FACEBOOK OPEN
+========================================= */
+
+function openFacebook(){
+
+  const data =
+    getLauncherData();
+
+
+  if(!data || !data.original)
+    return;
+
+
+  const original =
+    data.original;
+
+
+  if(isMobile()){
+
+    const fbUrl =
+      "fb://facewebmodal/f?href=" +
+      encodeURIComponent(original);
+
+
+    window.location.href =
+      fbUrl;
+
+
+    /* No mobile web fallback. Stay on launcher if app does not open. */
+
+  }else{
+
+    window.location.href =
+      original;
+
+  }
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+function isMobile(){
+
+  return /Android|iPhone|iPad|iPod/i.test(
+    navigator.userAgent
+  );
+
+}
+
+
+/* =========================================
+   LAUNCHER INITIALIZATION
+========================================= */
+
+function initializeLauncher(){
+
+  document.body.classList.add("launcher-page");
+
+  const data =
+    getLauncherData();
+
+
+  if(!data)
+    return;
+
+
+  document
+    .getElementById("mainHeader")
+    .style.display =
+    "none";
+
+
+  document
+    .getElementById("generator")
+    .style.display =
+    "none";
+
+
+  document
+    .getElementById("launcher")
+    .style.display =
+    "block";
+
+
+  const youtube =
+    document.getElementById(
+      "youtubeRetry"
+    );
+
+
+  const instagram =
+    document.getElementById(
+      "instagramRetry"
+    );
+
+
+  const facebook =
+    document.getElementById(
+      "facebookRetry"
+    );
+
+
+  youtube.style.display =
+    "none";
+
+  instagram.style.display =
+    "none";
+
+  facebook.style.display =
+    "none";
+
+
+  if(data.platform === "youtube"){
+
+    youtube.style.display =
+      "flex";
+
+
+    document
+      .getElementById("launcherTitle")
+      .textContent =
+      "Opening YouTube...";
+
+
+    setTimeout(()=>{
+
+      openYouTube();
+
+    },300);
+
+  }
+
+
+  else if(data.platform === "instagram"){
+
+    instagram.style.display =
+      "flex";
+
+
+    document
+      .getElementById("launcherTitle")
+      .textContent =
+      "Opening Instagram...";
+
+
+    setTimeout(()=>{
+
+      openInstagram();
+
+    },300);
+
+  }
+
+
+  else if(data.platform === "facebook"){
+
+    facebook.style.display =
+      "flex";
+
+
+    document
+      .getElementById("launcherTitle")
+      .textContent =
+      "Opening Facebook...";
+
+
+    setTimeout(()=>{
+
+      openFacebook();
+
+    },300);
+
+  }
+
+
+  setTimeout(()=>{
+
+    document
+      .getElementById("launcherTitle")
+      .textContent =
+      "Didn't open?";
+
+
+    document
+      .getElementById("launcherText")
+      .textContent =
+      "Tap the button below to try again.";
+
+
+    document
+      .getElementById("failure")
+      .style.display =
+      "block";
+
+  },2200);
+
+}
+
+
+/* =========================================
+   START
+========================================= */
+
+initializeLauncher();
+
+</script>
+
+</body>
+</html>
