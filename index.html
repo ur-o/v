@@ -396,10 +396,59 @@ body.launcher-page .launcher{
     line-height:1.4;
   }
 }
+
+/* =========================
+   PWA INSTALL BUTTON
+========================= */
+
+#installAppBtn{
+  display:none;
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index:9999;
+
+  border:0;
+  border-radius:14px;
+
+  padding:10px 14px;
+
+  font-weight:800;
+  font-size:13px;
+
+  color:#fff;
+
+  background:linear-gradient(135deg,#2563eb,#7c3aed);
+
+  box-shadow:0 8px 24px rgba(0,0,0,.25);
+
+  cursor:pointer;
+}
+
+#installAppBtn.show{
+  display:block;
+}
+
+  
 </style>
+
+<!-- PWA -->
+<link rel="manifest" href="./manifest.json">
+
+<meta name="theme-color" content="#111827">
+<meta name="mobile-web-app-capable" content="yes">
+
+<!-- iPhone / iPad -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
 </head>
 
 <body>
+
+  <button id="installAppBtn" type="button">
+  📲 Install App
+</button>
 
 <div class="container">
 
@@ -1657,6 +1706,90 @@ function initializeLauncher(){
 
 initializeLauncher();
 
+</script>
+
+  <script>
+/* =========================
+   PWA INSTALL
+========================= */
+
+(() => {
+
+  const installBtn = document.getElementById("installAppBtn");
+
+  let deferredInstallPrompt = null;
+
+
+  /* Browser install prompt ready */
+  window.addEventListener("beforeinstallprompt", (event) => {
+
+    event.preventDefault();
+
+    deferredInstallPrompt = event;
+
+    if(installBtn){
+      installBtn.classList.add("show");
+    }
+
+  });
+
+
+  /* Install button clicked */
+  if(installBtn){
+
+    installBtn.addEventListener("click", async () => {
+
+      if(!deferredInstallPrompt) return;
+
+      const promptEvent = deferredInstallPrompt;
+
+      deferredInstallPrompt = null;
+
+      installBtn.classList.remove("show");
+
+      try{
+
+        await promptEvent.prompt();
+
+        await promptEvent.userChoice;
+
+      }catch(error){
+
+        // User cancelled or browser blocked the prompt
+
+      }
+
+    });
+
+  }
+
+
+  /* App successfully installed */
+  window.addEventListener("appinstalled", () => {
+
+    deferredInstallPrompt = null;
+
+    if(installBtn){
+      installBtn.classList.remove("show");
+    }
+
+  });
+
+
+  /* Service Worker */
+  if("serviceWorker" in navigator){
+
+    window.addEventListener("load", () => {
+
+      navigator.serviceWorker
+        .register("./sw.js")
+        .catch(() => {});
+
+    });
+
+  }
+
+})();
 </script>
 
 </body>
